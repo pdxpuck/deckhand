@@ -3,20 +3,20 @@
  * Formal table/layout primitives arrive with game layout hints in P3.
  */
 import type { PileCard } from '../engine'
-import { CardView, POKER_RATIO } from './CardView'
+import { CardView } from './CardView'
 import type { CardTheme } from './theme'
 
 export interface StackViewProps {
   pileCards: readonly PileCard[]
   theme: CardTheme
-  /** Card width in px; height follows the poker ratio. */
+  /** Card width in px; height follows the theme's native ratio. */
   width: number
   /** Vertical offset per card in px. Default 0.25 * card height. */
   overlap?: number
 }
 
 export function StackView({ pileCards, theme, width, overlap }: StackViewProps) {
-  const height = Math.round(width * POKER_RATIO)
+  const height = Math.round(width * theme.ratio)
   const step = overlap ?? Math.round(height * 0.25)
   const stackHeight =
     pileCards.length > 0 ? height + step * (pileCards.length - 1) : height

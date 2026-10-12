@@ -1,20 +1,21 @@
 /**
  * CardView — pure presentational card renderer (face or back) for a theme.
- * File themes render an <img>; fragment themes render <svg viewBox><use/></svg>
- * (see theme.ts for the mechanism rationale).
+ * File themes render an <img> over an opaque white backing; fragment themes
+ * render <svg viewBox><use/></svg> (see theme.ts for the mechanism rationale).
  */
 import type { Card } from '../engine'
 import { cardLabel, isJoker } from '../engine'
 import type { CardTheme } from './theme'
 
-/** Height/width ratio of a poker card. */
+/** Fallback height/width ratio of a classic poker card. Themes carry their
+ * own native `ratio`; use this only when no theme is available. */
 export const POKER_RATIO = 1.4
 
 export interface CardViewProps {
   card: Card
   faceUp: boolean
   theme: CardTheme
-  /** Rendered width in px (height follows the poker ratio). Default 100. */
+  /** Rendered width in px (height follows the theme's native ratio). Default 100. */
   width?: number
   className?: string
   onClick?: () => void
@@ -28,7 +29,7 @@ export function CardView({
   className,
   onClick,
 }: CardViewProps) {
-  const height = Math.round(width * POKER_RATIO)
+  const height = Math.round(width * theme.ratio)
   // A joker falls back to the back art only when its theme ships no joker art.
   const showFace = faceUp && !(isJoker(card) && !theme.hasJokers)
   const url = showFace ? theme.faceUrl(card) : theme.backUrl()
@@ -36,7 +37,8 @@ export function CardView({
   const cursor = onClick ? 'pointer' : undefined
 
   if (theme.kind === 'fragment') {
-    // viewBoxFor(null) = the back crop.
+    // viewBoxFor(null) = the back crop. The viewBox aspect matches the
+    // width/height box, so the art fills the element — no stretching, no crop.
     const viewBox = theme.viewBoxFor?.(showFace ? card : null) ?? '0 0 100 140'
     return (
       <svg
@@ -54,20 +56,32 @@ export function CardView({
     )
   }
 
+  // Opaque backing layer: file-theme art ships transparent regions (notably
+  // the byron back's hatch pattern), so cards beneath would show through in
+  // stacks. The white card sits behind the art for backs AND faces (harmless
+  // for faces, which are already opaque).
   return (
-    <img
-      src={url}
-      alt={alt}
-      width={width}
-      height={height}
+    <div
       className={className}
       onClick={onClick}
-      draggable={false}
       style={{
-        display: 'block',
+        position: 'relative',
+        width,
+        height,
+        background: '#ffffff',
+        borderRadius: Math.round(width * 0.06),
+        overflow: 'hidden',
         cursor,
-        imageRendering: theme.imageRendering,
       }}
-    />
+    >
+      <img
+        src={url}
+        alt={alt}
+        width={width}
+        height={height}
+        draggable={false}
+        style={{ display: 'block', imageRendering: theme.imageRendering }}
+      />
+    </div>
   )
 }

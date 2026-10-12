@@ -8,9 +8,17 @@ const isViewBox = (s: string): boolean =>
   /^-?\d+(\.\d+)? -?\d+(\.\d+)? \d+(\.\d+)? \d+(\.\d+)?$/.test(s)
 
 describe('renderer themes', () => {
-  it('registers at least two themes with unique ids', () => {
-    expect(THEMES.length).toBeGreaterThanOrEqual(2)
+  it('registers exactly the two integrated themes with unique ids (kenney dropped at the P2 gate)', () => {
+    expect(THEMES.map((t) => t.id)).toEqual(['svgcards', 'byron'])
     expect(new Set(THEMES.map((t) => t.id)).size).toBe(THEMES.length)
+  })
+
+  it('every theme carries a sane native art ratio (height/width)', () => {
+    for (const theme of THEMES) {
+      expect(Number.isFinite(theme.ratio)).toBe(true)
+      expect(theme.ratio).toBeGreaterThanOrEqual(1.3)
+      expect(theme.ratio).toBeLessThanOrEqual(1.6)
+    }
   })
 
   it('every theme resolves a face URL for all 52 standard cards + a back + non-empty license/credit', () => {

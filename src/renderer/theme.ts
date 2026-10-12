@@ -12,10 +12,15 @@
  *                <img> cannot do fragments, hence the <use> wrapper.
  *                Fragment themes therefore also carry viewBoxFor(card | null),
  *                the viewBox crop that isolates one card inside the sprite.
+ *
+ * Every theme also carries `ratio` — the height/width of its art — so CardView
+ * renders at the native aspect (the P2 gate showed stretching when a global
+ * poker ratio was forced onto art with a different intrinsic shape).
  */
 import type { Card, Suit } from '../engine'
 import { RANK_LABELS, isJoker } from '../engine'
 import { EngineError } from '../engine'
+import { SVG_CARDS_GEOMETRY, SVG_CARDS_RATIO } from './svgcards-geometry'
 
 /** How CardView renders this theme's art (see module docstring). */
 export type ThemeKind = 'file' | 'fragment'
@@ -26,11 +31,13 @@ export interface CardTheme {
   readonly license: string
   readonly credit: string
   readonly kind: ThemeKind
+  /** Height/width of the art itself; CardView sizes cards by this. */
+  readonly ratio: number
   /** Whether the pack ships joker art (J1/J2 map to two variants). */
   readonly hasJokers: boolean
   /**
-   * <img> rendering hint: 'pixelated' for pixel-art packs (kenney),
-   * 'auto' (smooth) for vector packs. Fragment themes are vectors.
+   * <img> rendering hint: 'pixelated' for pixel-art packs, 'auto' (smooth)
+   * for vector packs. Fragment themes are vectors.
    */
   readonly imageRendering?: 'pixelated' | 'auto'
   /** Face art URL for a card (jokers included when hasJokers). */
@@ -47,26 +54,14 @@ export interface CardTheme {
 /* ------------------------------------------------------------------ */
 /* svgcards — David Bellot's SVG-cards 2.0.1 (LGPL-2.1+), single-file  */
 /* sprite. Card groups: "1_spade".."10_spade", "jack_spade", etc.;     */
-/* jokers "red_joker"/"black_joker"; back group "back". The sprite     */
-/* lays cards out on a grid (bottom-left anchored, cards drawn         */
-/* upward), so each fragment needs its own viewBox crop:               */
-/*   column x(rank) = (rank-1) * COL_PITCH                             */
-/*   row y(suit) per the table below; card is CARD_W x CARD_H.         */
-/* Geometry constants are derived from the unmodified svg-cards.svg    */
-/* (base card path 166.575 x 235.27; row pitch 243.137; col pitch      */
-/* 167.575; joker/back row anchored at y=972.55).                      */
+/* jokers "red_joker"/"black_joker"; back group "back". Per-card       */
+/* viewBox crops are MEASURED from the sprite by                       */
+/* scripts/derive-svgcards-geometry.mjs (the original hand-derived     */
+/* grid math cut the bottom edge off every card — the card body hangs  */
+/* 6.87 units below its row anchor, which the pitch math missed).      */
 /* ------------------------------------------------------------------ */
 
 const SVG_CARDS_URL = '/cards/svgcards/svg-cards.svg'
-const SVG_CARD_W = 166.575
-const SVG_CARD_H = 235.27
-const SVG_COL_PITCH = 167.575
-const SVG_ROW: Record<Suit, number> = { C: 0, D: 243.137, H: 486.275, S: 729.412 }
-const SVG_BOTTOM_ROW = 972.55
-/** Padding ≤ the 1.0 unit of horizontal whitespace between sprite cells. */
-const SVG_PAD = 0.9
-const SVG_JOKER_COL = { odd: 167.575, even: 0 } // red_joker / black_joker
-const SVG_BACK_X = 335.15
 const SVG_FACE_NAMES: Record<number, string> = { 11: 'jack', 12: 'queen', 13: 'king' }
 const SVG_SUIT_NAMES: Record<Suit, string> = {
   S: 'spade',
@@ -75,18 +70,17 @@ const SVG_SUIT_NAMES: Record<Suit, string> = {
   C: 'club',
 }
 
-function svgViewBox(cellX: number, cellY: number): string {
-  const x = cellX - SVG_PAD
-  const y = cellY - SVG_CARD_H - SVG_PAD
-  const w = SVG_CARD_W + 2 * SVG_PAD
-  const h = SVG_CARD_H + 2 * SVG_PAD
-  return `${x} ${y} ${w} ${h}`
-}
-
 function svgJokerIndex(card: Card): 'odd' | 'even' {
   // Joker ids look like J1, J2, J1#2 — parse the joker number, wrap > 2.
   const n = Number.parseInt(card.id.slice(1), 10)
   return Number.isNaN(n) || n % 2 === 1 ? 'odd' : 'even'
+}
+
+function svgGroupId(card: Card | null): string {
+  if (card === null) return 'back'
+  if (isJoker(card)) return svgJokerIndex(card) === 'odd' ? 'red_joker' : 'black_joker'
+  const rankName = SVG_FACE_NAMES[card.rank!] ?? String(card.rank)
+  return `${rankName}_${SVG_SUIT_NAMES[card.suit!]}`
 }
 
 const svgCardsTheme: CardTheme = {
@@ -95,22 +89,19 @@ const svgCardsTheme: CardTheme = {
   license: 'LGPL-2.1-or-later',
   credit: 'Playing cards by David Bellot (SVG-cards), LGPL-2.1+',
   kind: 'fragment',
+  ratio: SVG_CARDS_RATIO,
   hasJokers: true,
   faceUrl(card: Card): string {
-    if (isJoker(card)) {
-      const id = svgJokerIndex(card) === 'odd' ? 'red_joker' : 'black_joker'
-      return `${SVG_CARDS_URL}#${id}`
-    }
-    const rankName = SVG_FACE_NAMES[card.rank!] ?? String(card.rank)
-    return `${SVG_CARDS_URL}#${rankName}_${SVG_SUIT_NAMES[card.suit!]}`
+    return `${SVG_CARDS_URL}#${svgGroupId(card)}`
   },
   backUrl(): string {
     return `${SVG_CARDS_URL}#back`
   },
   viewBoxFor(card: Card | null): string {
-    if (card === null) return svgViewBox(SVG_BACK_X, SVG_BOTTOM_ROW)
-    if (isJoker(card)) return svgViewBox(SVG_JOKER_COL[svgJokerIndex(card)], SVG_BOTTOM_ROW)
-    return svgViewBox((card.rank! - 1) * SVG_COL_PITCH, SVG_ROW[card.suit!])
+    const group = svgGroupId(card)
+    const box = SVG_CARDS_GEOMETRY[group]
+    if (!box) throw new EngineError(`No svgcards geometry for card group "${group}"`)
+    return `${box.x} ${box.y} ${box.w} ${box.h}`
   },
 }
 
@@ -122,12 +113,21 @@ const svgCardsTheme: CardTheme = {
 /* Files: AS.svg, 2S.svg … 10C.svg (RANK_LABELS + suit letter).        */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Intrinsic aspect of Knoll's card SVGs, from the AS.svg root
+ * viewBox "0 0 167.0869141 242.6669922" — identical across all 55 files
+ * except back.svg (250x350 = 1.4), which letterboxes imperceptibly inside
+ * the taller box (<img> preserves aspect; it never stretches).
+ */
+const BYRON_RATIO = 242.6669922 / 167.0869141
+
 const byronTheme: CardTheme = {
   id: 'byron',
   label: 'Vector cards (Knoll)',
   license: 'Public domain (faces); back CC0 (BdRGames)',
   credit: 'Vector playing cards by Byron Knoll (public domain); back by BdRGames (CC0)',
   kind: 'file',
+  ratio: BYRON_RATIO,
   hasJokers: true,
   faceUrl(card: Card): string {
     if (isJoker(card)) {
@@ -140,48 +140,9 @@ const byronTheme: CardTheme = {
   },
 }
 
-/* ------------------------------------------------------------------ */
-/* kenney — Kenney "Playing Cards Pack" (CC0), 64x64 pixel-art PNGs.   */
-/* Files: card_<suit>_<rank>.png with zero-padded ranks (02..09);      */
-/* card_back.png; card_joker_black.png / card_joker_red.png.           */
-/* ------------------------------------------------------------------ */
-
-const KENNEY_SUIT_NAMES: Record<Suit, string> = {
-  S: 'spades',
-  H: 'hearts',
-  D: 'diamonds',
-  C: 'clubs',
-}
-
-function kenneyRankLabel(rank: number): string {
-  // Kenney zero-pads only the digit ranks 2..9 (card_clubs_02.png) —
-  // A/10/J/Q/K stay as-is (card_clubs_A.png).
-  const label = RANK_LABELS[rank]
-  return rank >= 2 && rank <= 9 ? `0${label}` : label
-}
-
-const kenneyTheme: CardTheme = {
-  id: 'kenney',
-  label: 'Pixel cards (Kenney)',
-  license: 'CC0 1.0',
-  credit: 'Playing Cards Pack by Kenney (kenney.nl), CC0',
-  kind: 'file',
-  hasJokers: true,
-  imageRendering: 'pixelated',
-  faceUrl(card: Card): string {
-    if (isJoker(card)) {
-      const color = svgJokerIndex(card) === 'odd' ? 'black' : 'red'
-      return `/cards/kenney/card_joker_${color}.png`
-    }
-    return `/cards/kenney/card_${KENNEY_SUIT_NAMES[card.suit!]}_${kenneyRankLabel(card.rank!)}.png`
-  },
-  backUrl(): string {
-    return '/cards/kenney/card_back.png'
-  },
-}
-
-/** Registered themes, in display order. */
-export const THEMES: readonly CardTheme[] = [svgCardsTheme, byronTheme, kenneyTheme]
+/** Registered themes, in display order. (kenney pixel pack dropped at the P2
+ * gate — user verdict; assets removed from public/cards/kenney.) */
+export const THEMES: readonly CardTheme[] = [svgCardsTheme, byronTheme]
 
 /** Look up a theme by id; throws EngineError for an unknown id. */
 export function getTheme(id: string): CardTheme {

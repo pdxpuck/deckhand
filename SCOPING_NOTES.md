@@ -144,6 +144,16 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
   - `kenney` — CC0 1.0 — files — 55 PNGs (52 faces, joker black/red, back)
 - Full per-pack provenance lives in `public/cards/<theme>/LICENSE.md`.
 
+### P2 gate verdict + fixes (2026-10-12, user)
+- svgcards: stretched + bottom-cropped at gate — replaced hand-derived grid math with
+  script-extracted per-group bboxes (scripts/derive-svgcards-geometry.mjs →
+  src/renderer/svgcards-geometry.ts); CardView now renders at each theme's native ratio.
+- byron: faces are the gate favorite; aces carry baked-in gradient shading (artist's
+  style — D4: not edited). Back SVG has transparent regions → CardView now renders an
+  opaque white backing layer under file-theme art.
+- kenney: user verdict "awful" at all sizes — DROPPED from THEMES, assets deleted.
+- O1 status: default-theme pick pending user re-gate of the fixed svgcards + byron backs.
+
 ## Relations to other ideas/projects
 
 - Absorbs three IDEAS.md entries as facets of this project: Card Theme System,

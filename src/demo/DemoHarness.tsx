@@ -57,7 +57,7 @@ function DemoHarness() {
 
   const theme = getTheme(themeId)
   const width = SIZE_OPTIONS.find((s) => s.id === sizeId)!.width
-  const height = Math.round(width * 1.4)
+  const height = Math.round(width * theme.ratio)
 
   // The whole loop runs through the action log: state = replay(initial, actions).
   const world = useMemo(() => replay(initialWorld, actions), [initialWorld, actions])
