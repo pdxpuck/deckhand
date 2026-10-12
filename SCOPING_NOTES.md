@@ -7,7 +7,8 @@ modules over a shared headless engine and themed renderer.
 - **Origin:** user revisit of card-deck work. Prior projects `cardframework/` and
   `blackjack_game/` (both Flutter, 2025–early 2026) were deleted from disk and are
   explicitly NOT resurrected — fresh start. Four orphaned Flutter files in a stray
-  `lib\` folder at the dev repo root were deleted in the promotion commit.
+  `lib\` folder at the dev repo root were deleted during the promotion session
+  (never tracked in git, so no deletion appears in commit history).
 
 ## Vision
 
