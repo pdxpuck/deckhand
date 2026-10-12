@@ -4,3 +4,97 @@ body {
   background-color: #fafafa;
   color: #1a1a1a;
 }
+
+/* P2 demo harness (dev-only visual-gate tooling; see src/demo/DemoHarness.tsx) */
+
+.demo {
+  padding: 16px 24px 48px;
+}
+
+.demo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.demo-btn {
+  padding: 4px 12px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  cursor: pointer;
+  font: inherit;
+}
+
+.demo-btn:hover {
+  background: #eee;
+}
+
+.demo-btn[data-active='true'] {
+  background: #1a1a1a;
+  color: #fafafa;
+  border-color: #1a1a1a;
+}
+
+.demo-input {
+  padding: 4px 8px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.demo-section {
+  margin-top: 28px;
+}
+
+.demo-section h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.demo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.demo-pile {
+  padding: 8px;
+  border: 1.5px dashed transparent;
+  border-radius: 8px;
+}
+
+.demo-pile[data-hover='true'] {
+  border-color: #2b7de9;
+  background: rgba(43, 125, 233, 0.08);
+}
+
+.demo-note {
+  color: #555;
+  font-size: 0.85rem;
+  margin: 4px 0 0;
+}
+
+.demo-error {
+  color: #c62828;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+  margin: 8px 0 0;
+}
+
+.demo-status {
+  font-size: 0.9rem;
+  margin-top: 8px;
+}

@@ -118,6 +118,32 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
 - **O5** — Deal numbering / daily-deal (Klondike tradition) — candidate feature, not v1; collection-project concern (D7).
 - **O6** — Standalone repo extraction — ✅ RESOLVED 2026-10-12: extracted to https://github.com/pdxpuck/deckhand via git subtree split (4 commits carried, hashes rewritten). Collection projects will consume deckhand via a local path dependency during P3/P4 contract churn.
 
+### P2 art-pack findings (2026-10-12)
+
+- **svg-cards (David Bellot):** project alive — SVG-cards 2.0.1 downloaded from
+  SourceForge (https://sourceforge.net/projects/svg-cards/); **LGPL-2.1-or-later**;
+  ships as a single-file SVG (~931 KB, 97 groups) intended for fragment refs
+  (`<use href="svg-cards.svg#1_spade">`). Integrated as the `fragment` kind: ids
+  `<1-10|jack|queen|king>_<spade|heart|diamond|club>`, plus `red_joker`,
+  `black_joker`, and a `back` group — all verified present; per-card viewBox crops
+  derived from the sprite grid (row pitch 243.137, col pitch 167.575, card
+  166.575 × 235.27, bottom row anchored y=972.55) and checked against the file.
+- **Byron Knoll (vector cards):** **public domain**; Google Code original is dead —
+  files retrieved unmodified from the mirror https://github.com/notpeter/Vector-Playing-Cards.
+  Back art: **not found in his set** (it ships faces only) — paired with a CC0 back
+  ("Playing cards back vector svg" by BdRGames, opengameart.org) both on disk and at
+  render time.
+- **Kenney (pixel cards):** the old `kenney.nl/assets/playing-cards` slug is 404 —
+  downloaded "Playing Cards Pack" v1.0 from the live
+  https://kenney.nl/assets/playing-cards-pack; **CC0 1.0** (pack ships its own
+  License.txt). Kept the 52 face PNGs + `card_back.png` + two joker PNGs from the
+  pack's `PNG/Cards (large)` folder; unused `card_empty.png` not kept.
+- **Integrated themes (all three cover 52 + back + jokers; none dropped):**
+  - `svgcards` — LGPL-2.1-or-later — fragments (1 sprite SVG) — 52 faces + 2 jokers + back in one file
+  - `byron` — public domain (faces) + CC0 (back, BdRGames) — files — 55 SVGs (52 faces, Joker1/2, back)
+  - `kenney` — CC0 1.0 — files — 55 PNGs (52 faces, joker black/red, back)
+- Full per-pack provenance lives in `public/cards/<theme>/LICENSE.md`.
+
 ## Relations to other ideas/projects
 
 - Absorbs three IDEAS.md entries as facets of this project: Card Theme System,
