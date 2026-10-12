@@ -1,0 +1,2 @@
+# Normalize line endings: repo stores LF; working tree stays as checked out (LF).
+* text=auto

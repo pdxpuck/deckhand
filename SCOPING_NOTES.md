@@ -116,7 +116,7 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
 - **O3** — Game persistence: localStorage vs IndexedDB — decide at P3 (needs at least mid-game save for solitaire).
 - **O4** — Wrap choice Capacitor vs Tauri (or both) — decide at P5.
 - **O5** — Deal numbering / daily-deal (Klondike tradition) — candidate feature, not v1; collection-project concern (D7).
-- **O6** — Standalone repo extraction (carwars pattern) — defer; monorepo dir `deckhand/` for now.
+- **O6** — Standalone repo extraction — ✅ RESOLVED 2026-10-12: extracted to https://github.com/pdxpuck/deckhand via git subtree split (4 commits carried, hashes rewritten). Collection projects will consume deckhand via a local path dependency during P3/P4 contract churn.
 
 ## Relations to other ideas/projects
 
