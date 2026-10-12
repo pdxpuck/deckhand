@@ -1,2 +1,2 @@
-# Normalize line endings: repo stores LF; working tree stays as checked out (LF).
-* text=auto
+# Line endings: repo stores LF; working tree checked out as LF on every platform.
+* text=auto eol=lf
