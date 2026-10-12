@@ -1,7 +1,8 @@
 # Deckhand — Scoping Notes
 
-Card-deck library + solitaire collection. Web-first TypeScript app; games are plug-in
-modules over a shared headless engine and themed renderer.
+Card-deck FRAMEWORK (engine + renderer + game-contract types) — no game rules live
+here (D7). Web-first TypeScript library. Game collections are separate projects
+consuming this framework.
 
 - **Added:** 2026-10-12
 - **Origin:** user revisit of card-deck work. Prior projects `cardframework/` and
@@ -40,6 +41,14 @@ rules module, not surgery on the core.
   triple pun: deck (of cards) + hand (of cards) + the sailor who works the deck.
 - **D6 — Cleanup approved.** Orphaned files deleted; dead tracker entries archived
   (same commit as this promotion).
+- **D7 — Framework only, no games.** Deckhand contains ZERO game implementations:
+  engine, renderer, and the game-contract types only. Games live in separate
+  collection projects — each collection = one project containing its game modules
+  + app shell (the first, a solitaire collection with Klondike + Canfield, will be
+  promoted as its own project when game implementation starts). Deckhand keeps a
+  dev-only renderer demo harness (card/theme display sandbox — test tooling, not a
+  game). Both stay in the dev monorepo with a local dependency during contract
+  proving; extraction later per O6.
 
 ## Lesson from the corpse
 
@@ -51,18 +60,20 @@ and scoring live entirely inside game modules.
 ## Architecture
 
 ```
-deckhand
-├── engine        (pure logic, no UI, seeded RNG, action log)
+deckhand (framework — NO games)
+├── engine          (pure logic, no UI, seeded RNG, action log)
 │   ├── deck construction (standard 52, multi-deck, jokers, custom sets)
 │   ├── shuffle (seeded → deterministic, testable, replayable)
 │   ├── deal / draw / hands / piles / stock-waste recycle
 │   └── action log → undo & replay nearly free
-├── renderer      (the "manage the graphics" layer)
+├── renderer        (the "manage the graphics" layer)
 │   ├── card component (face + back), theme system, art-pack loading
 │   ├── table/layout primitives, drag-drop foundation, animations
-└── games         (thin modules implementing the game contract)
-    ├── klondike
-    └── canfield
+│   └── dev-only demo harness (visual-gate tooling, not a game)
+└── game-contract   (types + runtime interfaces — implemented BY collections)
+
+collection projects (separate projects — consume deckhand, NOT part of this scope)
+└── first: solitaire collection — klondike + canfield modules + collection app shell
 ```
 
 ## Game module contract (sketch — the load-bearing design)
@@ -81,16 +92,22 @@ file + one layout hint set":
 Klondike + Canfield exist partly to PROVE this contract (palisade→carwars pattern:
 two consumers reveal the real interface).
 
+The contract TYPES live in deckhand; the implementations live in collection projects
+(D7). During P3/P4 the contract will churn — both projects share the monorepo with a
+local dependency to keep that cheap.
+
 ## Phases
 
-| Phase | Delivers | Gate |
-|---|---|---|
-| P0 | Scaffold: Vite + React + TS, vitest, folder structure | build + tests green |
-| P1 | Engine: generic deck, seeded shuffle, deal/draw, piles, action log → undo/replay | full test suite |
-| P2 | Renderer: card component, art pack, theme switcher, drag-drop foundation | user visual gate on themes |
-| P3 | Klondike playable end-to-end | user plays it |
-| P4 | Canfield + collection home screen (contract validation) | user plays it |
-| P5 | Native wraps (Android/Windows) | deferred until web feels right |
+Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
+
+| Phase | Delivers | Gate | Home |
+|---|---|---|---|
+| P0 | Scaffold: Vite + React + TS, vitest, folder structure | build + tests green | deckhand |
+| P1 | Engine: generic deck, seeded shuffle, deal/draw, piles, action log → undo/replay | full test suite | deckhand |
+| P2 | Renderer: card component, art pack, theme switcher, drag-drop foundation + demo harness | user visual gate on themes | deckhand |
+| P3 | Klondike playable end-to-end (first contract consumer) | user plays it | solitaire collection project |
+| P4 | Canfield + collection home screen (contract validation) | user plays it | solitaire collection project |
+| P5 | Native wraps (Android/Windows) | deferred until web feels right | collection projects (a library doesn't ship as an app) |
 
 ## Open questions
 
@@ -98,7 +115,7 @@ two consumers reveal the real interface).
 - **O2** — Scoring/stats scope: v1 keeps the engine pure; score/stat tracking is a game-module concern, decide per game.
 - **O3** — Game persistence: localStorage vs IndexedDB — decide at P3 (needs at least mid-game save for solitaire).
 - **O4** — Wrap choice Capacitor vs Tauri (or both) — decide at P5.
-- **O5** — Deal numbering / daily-deal (Klondike tradition) — candidate feature, not v1.
+- **O5** — Deal numbering / daily-deal (Klondike tradition) — candidate feature, not v1; collection-project concern (D7).
 - **O6** — Standalone repo extraction (carwars pattern) — defer; monorepo dir `deckhand/` for now.
 
 ## Relations to other ideas/projects
