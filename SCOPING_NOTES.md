@@ -154,6 +154,13 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
 - kenney: user verdict "awful" at all sizes — DROPPED from THEMES, assets deleted.
 - O1 status: default-theme pick pending user re-gate of the fixed svgcards + byron backs.
 
+### O1 resolved: default theme (2026-10-13, user)
+- **byron (Vector cards, Knoll)** is the default theme — "Vectors for everything."
+- svgcards renders correctly post-geometry-fix; its tall/narrow numerals are the
+  artist's lettering style (by design), which is why it loses the face-off.
+- The CC0 back + opaque backing reads well; swapable card backs remain a future
+  theme-system feature (noted, not scheduled).
+
 ## Relations to other ideas/projects
 
 - Absorbs three IDEAS.md entries as facets of this project: Card Theme System,

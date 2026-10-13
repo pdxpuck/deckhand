@@ -144,6 +144,9 @@ const byronTheme: CardTheme = {
  * gate — user verdict; assets removed from public/cards/kenney.) */
 export const THEMES: readonly CardTheme[] = [svgCardsTheme, byronTheme]
 
+/** User-picked default theme (P2 gate verdict, 2026-10-12): byron wins. */
+export const DEFAULT_THEME_ID = 'byron'
+
 /** Look up a theme by id; throws EngineError for an unknown id. */
 export function getTheme(id: string): CardTheme {
   const theme = THEMES.find((t) => t.id === id)
