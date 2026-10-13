@@ -2,7 +2,7 @@
  * StackView — minimal overlapping pile render (demo scaffolding for P2).
  * Formal table/layout primitives arrive with game layout hints in P3.
  */
-import type { PileCard } from '../engine'
+import type { PileCard } from '../engine/index.js'
 import { CardView } from './CardView'
 import type { CardTheme } from './theme'
 

@@ -17,9 +17,9 @@
  * renders at the native aspect (the P2 gate showed stretching when a global
  * poker ratio was forced onto art with a different intrinsic shape).
  */
-import type { Card, Suit } from '../engine'
-import { RANK_LABELS, isJoker } from '../engine'
-import { EngineError } from '../engine'
+import type { Card, Suit } from '../engine/index.js'
+import { RANK_LABELS, isJoker } from '../engine/index.js'
+import { EngineError } from '../engine/index.js'
 import { SVG_CARDS_GEOMETRY, SVG_CARDS_RATIO } from './svgcards-geometry'
 
 /** How CardView renders this theme's art (see module docstring). */

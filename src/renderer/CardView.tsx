@@ -3,8 +3,8 @@
  * File themes render an <img> over an opaque white backing; fragment themes
  * render <svg viewBox><use/></svg> (see theme.ts for the mechanism rationale).
  */
-import type { Card } from '../engine'
-import { cardLabel, isJoker } from '../engine'
+import type { Card } from '../engine/index.js'
+import { cardLabel, isJoker } from '../engine/index.js'
 import type { CardTheme } from './theme'
 
 /** Fallback height/width ratio of a classic poker card. Themes carry their
