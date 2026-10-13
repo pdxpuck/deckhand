@@ -57,6 +57,85 @@ describe('actions: move', () => {
   })
 })
 
+describe('actions: move with reverse', () => {
+  it('reverse move stacks the taken cards onto the target in REVERSED order', () => {
+    const initial = threePileWorld()
+    const next = applyAction(initial, {
+      type: 'move',
+      from: 'stock',
+      to: 'tableau',
+      count: 3,
+      reverse: true,
+    })
+    expect(next.piles['stock'].cards).toHaveLength(7)
+    expect(next.piles['tableau'].cards).toHaveLength(9)
+    // taken keeps pile order (bottom-to-top of the run); reversal stacks the
+    // top card of the run deepest in the appended block.
+    expect(next.piles['tableau'].cards.slice(6).map((pc) => pc.card.id)).toEqual(
+      [...initial.piles['stock'].cards.slice(7)].reverse().map((pc) => pc.card.id),
+    )
+  })
+
+  it('face states travel with their cards through reversal', () => {
+    let initial = createWorld(['p', 'q'])
+    initial = putCards(initial, 'p', [
+      down(deck[0]),
+      up(deck[1]),
+      down(deck[2]),
+      up(deck[3]),
+    ])
+    const next = applyAction(initial, {
+      type: 'move',
+      from: 'p',
+      to: 'q',
+      count: 4,
+      reverse: true,
+    })
+    // taken [0↓, 1↑, 2↓, 3↑] → stacked as [3↑, 2↓, 1↑, 0↓]
+    expect(next.piles['q'].cards.map((pc) => pc.card.id)).toEqual([
+      deck[3].id,
+      deck[2].id,
+      deck[1].id,
+      deck[0].id,
+    ])
+    expect(next.piles['q'].cards.map((pc) => pc.faceUp)).toEqual([true, false, true, false])
+    expect(next.piles['p'].cards).toHaveLength(0)
+  })
+
+  it('replay consistency: a script with reverse moves folds to sequential application', () => {
+    const initial = threePileWorld()
+    const script: Action[] = [
+      { type: 'move', from: 'stock', to: 'tableau', count: 3 },
+      { type: 'move', from: 'tableau', to: 'discard', count: 2, reverse: true },
+      { type: 'flip', pile: 'tableau' },
+      { type: 'move', from: 'discard', to: 'tableau', count: 2, faceUp: true, reverse: true },
+      { type: 'move', from: 'tableau', to: 'stock', count: 4, reverse: true },
+    ]
+    let sequential = initial
+    for (const action of script) sequential = applyAction(sequential, action)
+    expect(replay(initial, script)).toEqual(sequential)
+    expect(sequential.piles['stock'].cards).toHaveLength(11)
+    expect(sequential.piles['tableau'].cards).toHaveLength(5)
+    expect(sequential.piles['discard'].cards).toHaveLength(0)
+  })
+
+  it('default is unchanged: reverse omitted ≡ reverse false ≡ order preserved', () => {
+    const initial = threePileWorld()
+    const omitted = applyAction(initial, { type: 'move', from: 'stock', to: 'tableau', count: 3 })
+    const explicitFalse = applyAction(initial, {
+      type: 'move',
+      from: 'stock',
+      to: 'tableau',
+      count: 3,
+      reverse: false,
+    })
+    expect(explicitFalse).toEqual(omitted)
+    expect(omitted.piles['tableau'].cards.slice(6).map((pc) => pc.card.id)).toEqual(
+      initial.piles['stock'].cards.slice(7).map((pc) => pc.card.id),
+    )
+  })
+})
+
 describe('actions: flip', () => {
   it('flips the top card only', () => {
     const initial = threePileWorld()

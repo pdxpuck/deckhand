@@ -21,6 +21,12 @@ export type Action =
       readonly to: PileId
       readonly count: number
       readonly faceUp?: boolean
+      /**
+       * When true, the taken cards stack onto the target in REVERSED order —
+       * the physical "turn the pile over and move" operation; face states
+       * travel with their cards.
+       */
+      readonly reverse?: boolean
     }
   /** Flip the top card of a pile. */
   | { readonly type: 'flip'; readonly pile: PileId }
@@ -37,7 +43,11 @@ export function applyAction(world: World, action: Action): World {
   switch (action.type) {
     case 'move': {
       const { world: stripped, taken } = takeTop(world, action.from, action.count)
-      return putCards(stripped, action.to, taken, action.faceUp)
+      // `reverse` flips the taken run before it stacks: the target receives
+      // it top-card-first, like lifting the pile off, turning it over, and
+      // setting it down. Face states travel with their cards.
+      const moved = action.reverse ? [...taken].reverse() : taken
+      return putCards(stripped, action.to, moved, action.faceUp)
     }
     case 'flip': {
       return flipTop(world, action.pile)
