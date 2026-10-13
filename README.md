@@ -30,3 +30,4 @@ The card art assets under `/cards/` are NOT part of the package — consumers
 ship their own `/cards/` directory. Note: the app build and lib build share
 `dist/` and each empties it — run the one you need last.
 Cross-module imports use explicit `/index.js` paths so emitted d.ts resolves under bundler/nodenext (v0.3.4).
+The `contract` entry exports the game-contract types game modules implement (`GameMeta`, `GameDefinition`, …).

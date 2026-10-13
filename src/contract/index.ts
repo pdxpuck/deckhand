@@ -1,8 +1,8 @@
 /**
  * Deckhand game-contract — types + runtime interfaces implemented BY
- * collection projects (D7).
- *
- * Game-contract types arrive as the first collection consumes the engine —
+ * collection projects (D7). The first consumer is the solitaire collection's
+ * Klondike (P3); the contract is expected to churn during that consumption —
  * see ../SCOPING_NOTES.md.
  */
-export const CONTRACT_PLACEHOLDER = true
+export * from './meta'
+export * from './game'

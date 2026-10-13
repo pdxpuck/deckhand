@@ -161,6 +161,18 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
 - The CC0 back + opaque backing reads well; swapable card backs remain a future
   theme-system feature (noted, not scheduled).
 
+### Game contract v1 shipped (2026-10-13, v0.4.0)
+- deckhand/contract now types: GameMeta (migrated from the collection's C1 shape),
+  PileRole/PileSpec, LayoutHint, and GameDefinition {meta, deckSpec, piles, deal,
+  legalMoves, isWon, safeAutoMoves, layout}.
+- Player moves may compose 1-2 engine actions (e.g. run move + exposed-card flip);
+  legalMoves enumerates them (drives click-click UX + hints); deal() is pre-log so
+  saves are {seed, actions} and undo is slice+replay; safeAutoMoves is the GAME's
+  policy (engine stays rules-agnostic).
+- EXPECTED TO CHURN during Klondike (first consumer, in shellback-solitaire) —
+  Klondike Draw-1 is definition id 'klondike-draw1' (variants are sibling game
+  entries per user decision: klondike-draw3 arrives as its own game).
+
 ## Relations to other ideas/projects
 
 - Absorbs three IDEAS.md entries as facets of this project: Card Theme System,
