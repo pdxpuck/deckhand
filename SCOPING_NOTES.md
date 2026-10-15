@@ -181,6 +181,12 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
 - setThemeBase(base): theme art URLs honor a consumer base path (GitHub Pages
   sub-path hosting; default root-absolute behavior unchanged when never called).
 
+### Build-isolation fix (2026-10-15, v0.4.4)
+- App/lib build collision hazard closed in v0.4.4: app builds to `dist-app/`;
+  `dist/` is lib-only (file:-consumers like shellback-solitaire resolve against
+  it); any build order is now safe. (Was: both builds wrote shared `dist/` with
+  emptyOutDir, so every app build wiped the lib.)
+
 ## Relations to other ideas/projects
 
 - Absorbs three IDEAS.md entries as facets of this project: Card Theme System,
