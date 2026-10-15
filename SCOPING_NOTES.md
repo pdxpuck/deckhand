@@ -177,6 +177,10 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
 - useDrag start no longer preventDefaults pointerdown (click-compatible;
   shellback-solitaire drag-and-drop is the first real consumer).
 
+### Live-site fix (2026-10-15, v0.4.3)
+- setThemeBase(base): theme art URLs honor a consumer base path (GitHub Pages
+  sub-path hosting; default root-absolute behavior unchanged when never called).
+
 ## Relations to other ideas/projects
 
 - Absorbs three IDEAS.md entries as facets of this project: Card Theme System,

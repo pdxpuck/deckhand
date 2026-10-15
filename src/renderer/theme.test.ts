@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { RANKS, STANDARD, SUITS, buildDeck, cardId, jokerId } from '../engine'
-import { THEMES, getTheme } from './theme'
+import { THEMES, getTheme, setThemeBase } from './theme'
 
 const standardDeck = buildDeck(STANDARD)
 
@@ -73,5 +73,32 @@ describe('renderer themes', () => {
       expect(getTheme(theme.id).id).toBe(theme.id)
     }
     expect(() => getTheme('does-not-exist')).toThrow('Unknown card theme')
+  })
+
+  // setThemeBase is module state, so these cases are order-coupled: the base
+  // is restored to '' in the last one. Runs in definition order (sequential).
+  const aceOfSpades = { id: cardId('S', 1), suit: 'S' as const, rank: 1, copy: 1 }
+
+  it('art URLs stay root-absolute by default (setThemeBase never called)', () => {
+    const byron = getTheme('byron')
+    expect(byron.backUrl()).toBe('/cards/byron/back.svg')
+    expect(byron.faceUrl(aceOfSpades)).toBe('/cards/byron/AS.svg')
+    const svgcards = getTheme('svgcards')
+    expect(svgcards.backUrl()).toBe('/cards/svgcards/svg-cards.svg#back')
+    expect(svgcards.faceUrl(aceOfSpades)).toBe('/cards/svgcards/svg-cards.svg#1_spade')
+  })
+
+  it('setThemeBase prepends the base to every art URL (Pages sub-path hosting)', () => {
+    setThemeBase('/shellback-solitaire/')
+    const byron = getTheme('byron')
+    expect(byron.backUrl()).toBe('/shellback-solitaire/cards/byron/back.svg')
+    expect(byron.faceUrl(aceOfSpades)).toBe('/shellback-solitaire/cards/byron/AS.svg')
+  })
+
+  it("setThemeBase('') restores root-absolute URLs (order-coupled restore — runs last)", () => {
+    setThemeBase('')
+    const byron = getTheme('byron')
+    expect(byron.backUrl()).toBe('/cards/byron/back.svg')
+    expect(byron.faceUrl(aceOfSpades)).toBe('/cards/byron/AS.svg')
   })
 })

@@ -2,6 +2,9 @@
  * Card themes (D4 — consume existing art packs, never invent art).
  *
  * A theme maps engine Cards to static image URLs under /cards/<themeId>/.
+ * Art URLs are root-absolute by default; consumers hosted under a sub-path
+ * (e.g. GitHub Pages project sites) call setThemeBase() once at startup and
+ * every URL rides that base. Default behavior is unchanged without it.
  * Two rendering mechanisms exist (see CardView):
  *
  * - 'file'     — every card is its own image file; CardView renders <img>.
@@ -21,6 +24,14 @@ import type { Card, Suit } from '../engine/index.js'
 import { RANK_LABELS, isJoker } from '../engine/index.js'
 import { EngineError } from '../engine/index.js'
 import { SVG_CARDS_GEOMETRY, SVG_CARDS_RATIO } from './svgcards-geometry'
+
+/** Base path prepended to every theme art URL (default '' — root-absolute).
+ *  Consumers hosted under a sub-path call setThemeBase(import.meta.env.BASE_URL)
+ *  at startup; trailing slash is tolerated (normalized away on join). */
+let themeBase = ''
+export function setThemeBase(base: string): void {
+  themeBase = base.replace(/\/$/, '')
+}
 
 /** How CardView renders this theme's art (see module docstring). */
 export type ThemeKind = 'file' | 'fragment'
@@ -61,7 +72,7 @@ export interface CardTheme {
 /* 6.87 units below its row anchor, which the pitch math missed).      */
 /* ------------------------------------------------------------------ */
 
-const SVG_CARDS_URL = '/cards/svgcards/svg-cards.svg'
+const SVG_CARDS_PATH = '/cards/svgcards/svg-cards.svg'
 const SVG_FACE_NAMES: Record<number, string> = { 11: 'jack', 12: 'queen', 13: 'king' }
 const SVG_SUIT_NAMES: Record<Suit, string> = {
   S: 'spade',
@@ -92,10 +103,10 @@ const svgCardsTheme: CardTheme = {
   ratio: SVG_CARDS_RATIO,
   hasJokers: true,
   faceUrl(card: Card): string {
-    return `${SVG_CARDS_URL}#${svgGroupId(card)}`
+    return `${themeBase}${SVG_CARDS_PATH}#${svgGroupId(card)}`
   },
   backUrl(): string {
-    return `${SVG_CARDS_URL}#back`
+    return `${themeBase}${SVG_CARDS_PATH}#back`
   },
   viewBoxFor(card: Card | null): string {
     const group = svgGroupId(card)
@@ -131,12 +142,12 @@ const byronTheme: CardTheme = {
   hasJokers: true,
   faceUrl(card: Card): string {
     if (isJoker(card)) {
-      return `/cards/byron/Joker${svgJokerIndex(card) === 'odd' ? 1 : 2}.svg`
+      return `${themeBase}/cards/byron/Joker${svgJokerIndex(card) === 'odd' ? 1 : 2}.svg`
     }
-    return `/cards/byron/${RANK_LABELS[card.rank!]}${card.suit!}.svg`
+    return `${themeBase}/cards/byron/${RANK_LABELS[card.rank!]}${card.suit!}.svg`
   },
   backUrl(): string {
-    return '/cards/byron/back.svg'
+    return `${themeBase}/cards/byron/back.svg`
   },
 }
 
