@@ -186,6 +186,10 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
   `dist/` is lib-only (file:-consumers like shellback-solitaire resolve against
   it); any build order is now safe. (Was: both builds wrote shared `dist/` with
   emptyOutDir, so every app build wiped the lib.)
+- v0.4.5: react/react-dom moved from dependencies to devDependencies — own copies
+  under a file:-consumer's CI npm ci produced two React instances on the page
+  (null-useState crash at the first lib hook); peers are the only runtime
+  declaration now.
 
 ## Relations to other ideas/projects
 
