@@ -173,6 +173,10 @@ Deckhand scope = P0–P2 only. Game phases live in the collection projects (D7).
   Klondike Draw-1 is definition id 'klondike-draw1' (variants are sibling game
   entries per user decision: klondike-draw3 arrives as its own game).
 
+### Consumer-driven fix (2026-10-15, v0.4.2)
+- useDrag start no longer preventDefaults pointerdown (click-compatible;
+  shellback-solitaire drag-and-drop is the first real consumer).
+
 ## Relations to other ideas/projects
 
 - Absorbs three IDEAS.md entries as facets of this project: Card Theme System,

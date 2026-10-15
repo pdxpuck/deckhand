@@ -9,9 +9,19 @@
  * element that received the pointerdown (e.currentTarget), which lets
  * consumers tag sources via data attributes.
  *
+ * CLICK-COMPATIBLE: `start` never cancels the default pointerdown action,
+ * so the browser still fires its compatibility mouse events — native click
+ * and dblclick work normally on drag sources. A press with little or no
+ * movement is an ordinary click; consumers that must tell click from drag
+ * implement their own movement threshold on the drag callbacks.
+ *
+ * Touch-scroll suppression comes from the bindings' `touch-action: none`
+ * style, not from JavaScript. Suppressing text selection and native image
+ * drag during drags is consumer CSS territory (user-select, draggable=false)
+ * — the hook does not handle either.
+ *
  * Drop-target checks pair this with withinBounds(point, elementRect).
- * Consumers should attach `bindings` to the draggable element; the style
- * (touch-action: none) keeps touch drags from scrolling the page.
+ * Consumers should attach `bindings` to the draggable element.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react'
@@ -72,7 +82,6 @@ export function useDrag(callbacks: DragCallbacks = {}): DragHandle {
 
   const start = useCallback((e: ReactPointerEvent<HTMLElement>) => {
     if (e.button !== 0) return // primary button / pen / finger only
-    e.preventDefault()
     e.currentTarget.setPointerCapture(e.pointerId)
     activeRef.current = true
     const p = { x: e.clientX, y: e.clientY }
